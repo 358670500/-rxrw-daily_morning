@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from dateutil import relativedelta
 import math
 from wechatpy import WeChatClient
 from wechatpy.client.api import WeChatMessage, WeChatTemplate
@@ -25,8 +26,10 @@ def get_weather():
   return weather['weather'], math.floor(weather['temp'])
 
 def get_count():
-  delta = today - datetime.strptime(start_date, "%Y-%m-%d")
-  return delta.days, delta.years
+  delta = relativedelta.relativedelta(today, datetime.strptime(start_date, "%Y-%m-%d"))
+  res = "{}年{}月{}日".format(delta.years, delta.months, delta.days)
+  # delta = today - datetime.strptime(start_date, "%Y-%m-%d")
+  return res
 
 def get_birthday():
   next = datetime.strptime(str(date.today().year) + "-" + birthday, "%Y-%m-%d")
@@ -48,6 +51,6 @@ client = WeChatClient(app_id, app_secret)
 
 wm = WeChatMessage(client)
 wea, temperature = get_weather()
-data = {"weather":{"value":wea},"temperature":{"value":temperature},"love_days":{"value":get_count()[0]},"love_years":{"value":get_count()[1]},"birthday_left":{"value":get_birthday()},"words":{"value":get_words(), "color":get_random_color()}}
+data = {"weather":{"value":wea},"temperature":{"value":temperature},"love_days":{"value":get_count()},"birthday_left":{"value":get_birthday()},"words":{"value":get_words(), "color":get_random_color()}}
 res = wm.send_template(user_id, template_id, data)
 print(res)
